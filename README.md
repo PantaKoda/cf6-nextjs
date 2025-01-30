@@ -17,6 +17,9 @@ some upgrades to ui as well.
 
 ## Build and deploy
 
+The app is currently hosted here https://cf6app.deepestvibe.com . Please wait a bit to load the data on the map. I will add some caching in the future for an initial load.
+Not very polished but will be improved.
+
 The app is developed on Next.js. It is mostly client side rendered but according to react it is better to [start with a framework](https://react.dev/learn/start-a-new-react-project).
 This app is using docker to build the app and deploy it to the target environment that supports docker.
 The docker file used is according to the Next.js recommendations [here](https://github.com/vercel/next.js/blob/canary/examples/with-docker/Dockerfile).
