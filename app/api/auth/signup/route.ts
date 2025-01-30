@@ -1,7 +1,5 @@
-// app/api/auth/signup/route.ts
 import { NextResponse } from "next/server";
-import { db } from "@/db";
-import { users } from "@/lib/schema";
+import { users } from "@/lib/schema"; // This is just an object; fine to import
 import { eq } from "drizzle-orm";
 import { hash } from "bcrypt";
 
@@ -9,13 +7,15 @@ export async function POST(req: Request) {
     try {
         const { email, password } = await req.json();
 
-        // Validate input
         if (!email || !password) {
             return NextResponse.json(
                 { message: "Email and password are required" },
                 { status: 400 }
             );
         }
+
+        // Lazy-import db so it doesn't trigger at build time
+        const { db } = await import("@/db");
 
         // Check if user already exists
         const existingUser = await db
@@ -38,13 +38,10 @@ export async function POST(req: Request) {
         await db.insert(users).values({
             email,
             password_hash: hashedPassword,
-            display_name: email.split("@")[0], // Default display name from email
+            display_name: email.split("@")[0],
         });
 
-        return NextResponse.json(
-            { message: "User created successfully" },
-            { status: 201 }
-        );
+        return NextResponse.json({ message: "User created successfully" }, { status: 201 });
     } catch (error) {
         console.error("Signup error:", error);
         return NextResponse.json(

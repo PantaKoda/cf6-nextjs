@@ -1,8 +1,6 @@
-// app/api/auth/[...nextauth]/route.ts
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { db } from "@/db";
 import { users } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { compare } from "bcrypt";
@@ -17,12 +15,15 @@ const handler = NextAuth({
             name: "Credentials",
             credentials: {
                 email: { label: "Email", type: "email" },
-                password: { label: "Password", type: "password" }
+                password: { label: "Password", type: "password" },
             },
             async authorize(credentials) {
                 if (!credentials?.email || !credentials?.password) {
                     return null;
                 }
+
+                // Dynamically import db only at runtime
+                const { db } = await import("@/db");
 
                 const user = await db
                     .select()
@@ -35,7 +36,6 @@ const handler = NextAuth({
                 }
 
                 const isPasswordValid = await compare(credentials.password, user.password_hash);
-
                 if (!isPasswordValid) {
                     return null;
                 }
@@ -45,15 +45,14 @@ const handler = NextAuth({
                     email: user.email,
                     name: user.display_name,
                 };
-            }
+            },
         }),
     ],
-    session: {
-        strategy: "jwt",
-    },
+    session: { strategy: "jwt" },
     callbacks: {
         async signIn({ user, account }) {
             if (account?.provider === "google") {
+                const { db } = await import("@/db"); // lazy import again
                 const existingUser = await db
                     .select()
                     .from(users)
@@ -61,7 +60,6 @@ const handler = NextAuth({
                     .get();
 
                 if (!existingUser) {
-                    // Create new user if they don't exist
                     await db.insert(users).values({
                         email: user.email!,
                         display_name: user.name,
@@ -79,8 +77,8 @@ const handler = NextAuth({
         },
     },
     pages: {
-        signIn: "/", // Use your sign-in page
-        error: "/api/auth/error", // Error page
+        signIn: "/",
+        error: "/api/auth/error",
     },
 });
 
