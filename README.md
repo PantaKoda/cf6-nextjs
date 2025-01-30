@@ -9,7 +9,7 @@ It supports login in / sing up using credentials(email/password) or using google
 
 The aim is to add few more features in the future:
 - creating personal fleet for easier tracking
-- global support for vessel tracking 
+- global support for vessel tracking
 - database of vessels,
 - user submit ship info
 
@@ -23,29 +23,34 @@ The docker file used is according to the Next.js recommendations [here](https://
 
 How to build it locally :
 
+1) clone the repo  and cd inside it.
+   The app is using https://aissse.deepestvibe.com/api/ships .
+   This is based on this project [.NET SSE](https://github.com/PantaKoda/cf6-netsse) which I developed to support the current project.
+
+2) Then :
 ```bash
-docker build . -t nextjs-sse
+ docker build . -t nextjs-sse
 ```
 
 you can change the image tag nextjs-sse to your choice.
-then create and run the container : 
+
+3) then create and run the container :
 
 ```bash
-docker run -p 3000:3000 nextjs-sse
+ docker run -p 3000:3000 nextjs-sse
 ``` 
 `-p 3000:3000` will map the port 3000 from you local machine to port 3000 inside the docker container.
-If the port on you machine is already in use adn an error is thrown, try a different port like : 
+If the port on you machine is already in use adn an error is thrown, try a different port like :
 ```bash
-docker run -p 3001:3000 nextjs-sse
+ docker run -p 3001:3000 nextjs-sse
 ``` 
 
-One last thing. The app consumes stream messages from an external service build in this [repo]().
 
 # Misc on the implementation
 
-The app leverages also database also . I chose sqlite though favouring a start simple approach. Currently, I am saving only user registration/sign ups.
+The app makes use of a database . I chose sqlite though favouring a start simple approach. Currently, I am saving only user registration/sign ups.
 
-here is a simple table created : 
+here is a simple table created :
 ```sql
 CREATE TABLE users (
     user_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -64,6 +69,5 @@ I am planning to add more features to the app like creating voyage statistics pe
 In the spirit of learning I chose typescript from the start which added some complexity trying to make the type system work but
 the static analysis helped a lot be more confident on the code.
 
-React was chosen as a popular javascript framework. I initially developed the app in both Svelte(Svelte kit) and Vue which 
-worked fine as well . The final choice for React was mainly chosen because of the popularity. Also react native seems to have some core concepts of React transferred
-so in case someone is interested in mobile development maybe it will be a bit easier.
+React was chosen as a popular javascript framework. I initially developed the app in both Svelte(Svelte kit) and Vue which
+worked fine as well . React was chosen for popularity reason.
