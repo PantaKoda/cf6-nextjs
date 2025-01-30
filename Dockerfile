@@ -51,13 +51,13 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Create writable directory for SQLite database
+# Ensure /data exists before Next.js runs and is writable
 RUN mkdir -p /data && chown nextjs:nodejs /data
 VOLUME /data
 
-# Copy SQLite database file to writable location
+# Ensure database is not overwritten if it already exists
 COPY --from=builder /app/users.db /data/users.db
-RUN chmod 666 /data/users.db
+RUN chmod 666 /data/users.db || true
 
 USER nextjs
 
@@ -65,6 +65,7 @@ EXPOSE 3000
 
 ENV PORT=3000
 
+# Set DATABASE_URL to match the code's expectation
 ENV DATABASE_URL="/data/users.db"
 
 # server.js is created by next build from the standalone output
