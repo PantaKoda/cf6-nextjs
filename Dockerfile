@@ -15,7 +15,6 @@ RUN \
   else echo "Lockfile not found." && exit 1; \
   fi
 
-
 # Rebuild the source code only when needed
 FROM base AS builder
 WORKDIR /app
@@ -52,17 +51,21 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Copy SQLite database file to match the code's expected location
-COPY --from=builder --chown=nextjs:nodejs /app/users.db ./users.db
-RUN chmod 644 ./users.db
+# Create writable directory for SQLite database
+RUN mkdir -p /data && chown nextjs:nodejs /data
+VOLUME /data
+
+# Copy SQLite database file to writable location
+COPY --from=builder /app/users.db /data/users.db
+RUN chmod 666 /data/users.db
 
 USER nextjs
 
 EXPOSE 3000
 
 ENV PORT=3000
-# Set DATABASE_URL to match the code's expectation
-ENV DATABASE_URL="./users.db"
+
+ENV DATABASE_URL="/data/users.db"
 
 # server.js is created by next build from the standalone output
 # https://nextjs.org/docs/pages/api-reference/config/next-config-js/output
